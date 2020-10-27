@@ -101,6 +101,7 @@ class NetworkImageNet(nn.Module):
         super(NetworkImageNet, self).__init__()
         self._layers = layers
         self._auxiliary = auxiliary
+        self.drop_path_prob = 0.0
         self.drop_rate = 0.0
 
         self.stem0 = nn.Sequential(
