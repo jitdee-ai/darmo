@@ -2,9 +2,8 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-from darmo.models.operations import *
-from darmo.models.utils import drop_path
-
+from .operations import *
+from .utils import drop_path
 
 class Cell(nn.Module):
 
