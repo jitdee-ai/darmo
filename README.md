@@ -5,6 +5,7 @@ Darts family models pre-trained
 
 [![PyPI version](https://badge.fury.io/py/darmo.svg)](https://badge.fury.io/py/darmo)
 ![PyPI Release](https://github.com/jitdee-ai/darts-models/workflows/PyPI%20Release/badge.svg)
+[![DOI](https://zenodo.org/badge/307382940.svg)](https://zenodo.org/badge/latestdoi/307382940)
 
 ## What's New
 
@@ -34,3 +35,15 @@ The library can be installed with pip:
     # Reset classifier layer with add dropout before classifier layer
 	model.reset_classifier(num_classes=100, dropout=0.2)
 
+## Citations this source code
+
+    @software{chakkrit_termritthikun_2020_4139755,
+    author       = {Chakkrit Termritthikun},
+    title        = {jitdee-ai/darmo: pre-trained models for darts},
+    month        = oct,
+    year         = 2020,
+    publisher    = {Zenodo},
+    version      = {0.0.4},
+    doi          = {10.5281/zenodo.4139755},
+    url          = {https://doi.org/10.5281/zenodo.4139755}
+    }
