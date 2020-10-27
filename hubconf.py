@@ -1,4 +1,4 @@
 dependencies = ['torch']
-from darmo.models import registry
+from darmo import registry
 
 globals().update(registry._model_entrypoints)
