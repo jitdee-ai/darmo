@@ -3,6 +3,9 @@
 
 Darts family models pre-trained
 
+[![PyPI version](https://badge.fury.io/py/darmo.svg)](https://badge.fury.io/py/darmo)
+![PyPI Release](https://github.com/jitdee-ai/darts-models/workflows/PyPI%20Release/badge.svg)
+
 ## What's New
 
 Oct 27, 2020
