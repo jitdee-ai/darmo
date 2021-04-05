@@ -156,7 +156,10 @@ class NetworkImageNet(nn.Module):
             out = F.dropout(out, p=self.drop_rate, training=self.training)
 
         logits = self.classifier(out.view(out.size(0), -1))
-        return logits, logits_aux
+        if self._auxiliary:
+            return logits, logits_aux
+        else:
+            return logits
 
     def reset_classifier(self, num_classes, dropout=0.0):
         self.num_classes = num_classes
