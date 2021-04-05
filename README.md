@@ -9,6 +9,10 @@ Darts family models pre-trained
 
 ## What's New
 
+April 5, 2021
+ - Add NASNet models
+ - set params auxiliary
+
 Oct 27, 2020
  - Add DARTSv2, PDART, RelativeNAS models
  
