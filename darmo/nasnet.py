@@ -577,7 +577,7 @@ class NASNetAMobile(nn.Module):
         self.dropout = nn.Dropout(self.drop_rate)
 
         self.num_features = 24*filters
-        self.last_linear = nn.Linear(24*filters, self.num_classes)
+        self.classifier = nn.Linear(24*filters, self.num_classes)
 
     def features(self, input):
         x_conv0 = self.conv0(input)
@@ -609,7 +609,7 @@ class NASNetAMobile(nn.Module):
         x = self.avg_pool(x)
         x = x.view(x.size(0), -1)
         x = self.dropout(x)
-        x = self.last_linear(x)
+        x = self.classifier(x)
         return x
 
     def forward(self, input):
@@ -621,7 +621,7 @@ class NASNetAMobile(nn.Module):
         self.num_classes = num_classes
         self.drop_rate = dropout
 
-        del self.last_linear
+        del self.classifier 
 
         if self.num_classes:
             self.classifier = nn.Linear(self.num_features, self.num_classes)
