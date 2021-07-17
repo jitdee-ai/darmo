@@ -624,9 +624,9 @@ class NASNetAMobile(nn.Module):
         del self.last_linear
 
         if self.num_classes:
-            self.last_linear = nn.Linear(self.num_features, self.num_classes)
+            self.classifier = nn.Linear(self.num_features, self.num_classes)
         else:
-            self.last_linear = None
+            self.classifier = None
 
 
 def nasnetamobile(num_classes=1000, pretrained='imagenet'):
