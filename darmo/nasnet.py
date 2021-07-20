@@ -577,7 +577,7 @@ class NASNetAMobile(nn.Module):
         self.dropout = nn.Dropout(self.drop_rate)
 
         self.num_features = 24*filters
-        self.classifier = nn.Linear(24*filters, self.num_classes)
+        self.last_linear = nn.Linear(24*filters, self.num_classes)
 
     def features(self, input):
         x_conv0 = self.conv0(input)
@@ -609,7 +609,7 @@ class NASNetAMobile(nn.Module):
         x = self.avg_pool(x)
         x = x.view(x.size(0), -1)
         x = self.dropout(x)
-        x = self.classifier(x)
+        x = self.last_linear(x)
         return x
 
     def forward(self, input):
@@ -621,12 +621,12 @@ class NASNetAMobile(nn.Module):
         self.num_classes = num_classes
         self.drop_rate = dropout
 
-        del self.classifier 
+        del self.last_linear
 
         if self.num_classes:
-            self.classifier = nn.Linear(self.num_features, self.num_classes)
+            self.last_linear = nn.Linear(self.num_features, self.num_classes)
         else:
-            self.classifier = None
+            self.last_linear = None
 
 
 def nasnetamobile(num_classes=1000, pretrained='imagenet'):
@@ -668,8 +668,9 @@ def nasnetamobile(num_classes=1000, pretrained='imagenet'):
 
 if __name__ == "__main__":
 
-    model = NASNetAMobile()
-    model.reset_classifier(num_classes=10)
+    model = NASNetAMobile(num_classes=1000)
+    state_dict = torch.load("nasnetamobile-7e03cead.pth", map_location='cpu')
+    model.load_state_dict(state_dict, strict=True)
     input = Variable(torch.randn(1, 3, 224, 224))
     output = model(input)
 

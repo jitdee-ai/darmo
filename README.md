@@ -1,4 +1,5 @@
 
+
 # DARMO 
 
 Darts family models pre-trained
@@ -9,9 +10,12 @@ Darts family models pre-trained
 
 ## What's New
 
+July 20, 2021
+ - Add test imagenet sctipt and result
+
 April 5, 2021
  - Add NASNet models
- - set params auxiliary
+ - Set params auxiliary
 
 Oct 27, 2020
  - Add DARTSv2, PDART, RelativeNAS models
@@ -42,6 +46,20 @@ The library can be installed with pip:
 	
     # Reset classifier layer with add dropout before classifier layer
 	model.reset_classifier(num_classes=100, dropout=0.2)
+
+## Test model on ImageNet
+    git clone https://github.com/jitdee-ai/darmo/
+    cd darmo
+    python test_imagenet.py --arch relative_nas --data [path of imagenet include val folder]
+
+## Results of ImageNet
+
+| Model | Top-1 Acc | Top-5 Acc | 
+|--|--|--|
+| dartsv2 | 73.59 | 91.40 |
+| pdarts | 75.94 | 92.74 |
+| relative_nas |  |  |
+| nasnet |  |  |
 
 ## Citations this source code
 

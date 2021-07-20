@@ -55,10 +55,10 @@ def _load_pre_trained(config):
     if config['pretrained']:
         state_dict = model_zoo.load_url(url_cfgs[config['name']], progress=True, map_location='cpu')
         try:
-            base_net.load_state_dict(state_dict, strict=False)
+            base_net.load_state_dict(state_dict, strict=True)
             print("loaded state dict")
         except RuntimeError:
-            base_net.load_state_dict(_remove_module(state_dict), strict=False)
+            base_net.load_state_dict(_remove_module(state_dict), strict=True)
             print("loaded state dict")
     return base_net
 
