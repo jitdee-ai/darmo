@@ -10,11 +10,14 @@ Darts family models pre-trained
 
 ## What's New
 
+Aug 3, 2021
+ - Add EEEA-Net-C2 model
+
 July 20, 2021
  - Add test imagenet sctipt and result
 
 April 5, 2021
- - Add NASNet models
+ - Add NASNet model
  - Set params auxiliary
 
 Oct 27, 2020
@@ -26,7 +29,8 @@ Oct 27, 2020
  - [dartsv2](https://github.com/quark0/darts)
  - [pdarts](https://github.com/chenxin061/pdarts)
  - [relative_nas](https://github.com/EMI-Group/RelativeNAS)
-
+ - [eeea_c2](https://github.com/chakkritte/EEEA-Net)
+  
 ## Install
 
 The library can be installed with pip:
@@ -37,7 +41,7 @@ The library can be installed with pip:
 
     import darmo
     
-    # just change -> "dartsv2", "pdarts", "relative_nas", "nasnet"
+    # just change -> "dartsv2", "pdarts", "relative_nas", "nasnet", "eeea_c2"
     model = darmo.create_model("dartsv2", num_classes=1000, pretrained=True, auxiliary=True)
 
 ## Supported Transfer learning

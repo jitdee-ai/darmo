@@ -10,6 +10,10 @@ setup(
     packages=['darmo'],
     url='https://github.com/jitdee-ai/darmo',
     description='darts model pre-trained',
-    install_requires=['torch >= 1.0', 'torchvision'],
+    install_requires=['torch >= 1.0', 'torchvision', 'ofa==0.0.4.post2007200808', 'timm==0.4.12'],
     python_requires='>=3.6',
+    package_data={
+        'darmo': ['config/*.*'],
+    },
 )
+
