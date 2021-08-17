@@ -65,7 +65,7 @@ The library can be installed with pip:
 |--|--|--|
 | dartsv2 | 73.59 | 91.40 |
 | pdarts | 75.94 | 92.74 |
-| eeea_c1 | |  |
+| eeea_c1 | 74.19 | 91.49 |
 | eeea_c2 | 76.17| 92.66 |
 
 ## Citations this source code
