@@ -1,6 +1,5 @@
 import os
 import sys
-import numpy as np
 import torch
 import argparse
 import torch.nn as nn
@@ -8,8 +7,6 @@ import torch.utils
 import torchvision.datasets as dset
 import torchvision.transforms as transforms
 import torch.backends.cudnn as cudnn
-from torch.autograd import Variable
-
 import darmo
 import pooraka as prk
 
@@ -17,7 +14,7 @@ parser = argparse.ArgumentParser("imagenet")
 parser.add_argument('--data', type=str, default='/home/mllab/proj/ILSVRC2015/Data/CLS-LOC', help='location of the data corpus')
 parser.add_argument('--batch_size', type=int, default=128, help='batch size')
 parser.add_argument('--gpu', type=int, default=0, help='gpu device id')
-parser.add_argument('--arch', type=str, default='pdarts', help='which architecture to use')
+parser.add_argument('--arch', type=str, default='nasnet', help='which architecture to use')
 args = parser.parse_args()
 
 def main():
@@ -28,7 +25,7 @@ def main():
   cudnn.benchmark = True
   cudnn.enabled=True
 
-  model = darmo.create_model(args.arch, num_classes=1000, pretrained=True, auxiliary=True)
+  model = darmo.create_model(args.arch, num_classes=1000, pretrained=True)
 
   model = model.cuda()
 
@@ -63,10 +60,10 @@ def infer(valid_queue, model, criterion):
   for step, (input, target) in enumerate(valid_queue):
     target = target.cuda(non_blocking=True)
     input = input.cuda(non_blocking=True)
-    logits, _ = model(input)
+    logits = model(input)
     loss = criterion(logits, target)
 
-    prec1, prec5 = prk.utils.accuracy(logits, target, topk=(1, 5))
+    prec1, prec5 = accuracy(logits, target, topk=(1, 5))
     n = input.size(0)
     objs.update(loss.item(), n)
     top1.update(prec1.item(), n)
@@ -74,6 +71,21 @@ def infer(valid_queue, model, criterion):
 
   return top1.avg, top5.avg, objs.avg
 
+def accuracy(output, target, topk=(1,)):
+    """Computes the accuracy over the k top predictions for the specified values of k"""
+    with torch.no_grad():
+        maxk = max(topk)
+        batch_size = target.size(0)
+
+        _, pred = output.topk(maxk, 1, True, True)
+        pred = pred.t()
+        correct = pred.eq(target.view(1, -1).expand_as(pred))
+
+        res = []
+        for k in topk:
+            correct_k = correct[:k].reshape(-1).float().sum() #sum(0, keepdim=True)
+            res.append(correct_k.mul_(100.0 / batch_size))
+        return res
 
 if __name__ == '__main__':
   main() 

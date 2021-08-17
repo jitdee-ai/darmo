@@ -21,6 +21,7 @@ url_cfgs = {
     'pdarts' : 'https://github.com/jitdee-ai/darts-models/releases/download/0.0.1/pdarts.pt',
     'relative_nas' : 'https://github.com/jitdee-ai/darts-models/releases/download/0.0.1/relative_nas.pt',
     'nasnet' : 'https://github.com/jitdee-ai/darmo/releases/download/0.0.1/nasnetamobile-7e03cead.pth',
+    'eeea_c1' : 'https://github.com/jitdee-ai/darmo/releases/download/0.0.1/eeea_c1.pt',
     'eeea_c2' : 'https://github.com/jitdee-ai/darmo/releases/download/0.0.1/eeea-c2.pt',
 }
 
@@ -47,9 +48,9 @@ def _set_config(_config={}, name=None, first_channels=48, layers=14, auxiliary=T
 def _load_pre_trained(config):
     if config['name'] == 'nasnet':
         base_net = NASNetAMobile()
-    elif config['name'] == 'eeea_c2':
-        config_file = pkg_resources.resource_filename(__name__, "config/eeea_c2.config")
-        subnet_file = pkg_resources.resource_filename(__name__, "config/eeea_c2.subnet")
+    elif config['name'].startswith("eeea_"):
+        config_file = pkg_resources.resource_filename(__name__, "config/"+config['name']+".config")
+        subnet_file = pkg_resources.resource_filename(__name__, "config/"+config['name']+".subnet")
         config_subnet = json.load(open(config_file))
         subnet = json.load(open(subnet_file))
         base_net = NSGANetV2.build_from_config(config_subnet, depth=subnet['d'])
@@ -104,6 +105,14 @@ def relative_nas(pretrained=True, num_classes=1000, auxiliary=True):
 def nasnet(pretrained=True, num_classes=1000, auxiliary=True):
 
     config = _set_config(_config={}, name= 'nasnet', first_channels=46, layers=14, auxiliary=auxiliary, 
+                        genotype=None, last_bn=False, pretrained=pretrained, num_classes=num_classes)
+
+    return _load_pre_trained(config)
+
+@register_model
+def eeea_c1(pretrained=True, num_classes=1000, auxiliary=True):
+
+    config = _set_config(_config={}, name= 'eeea_c1', first_channels=46, layers=14, auxiliary=auxiliary, 
                         genotype=None, last_bn=False, pretrained=pretrained, num_classes=num_classes)
 
     return _load_pre_trained(config)

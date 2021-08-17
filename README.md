@@ -10,6 +10,9 @@ Darts family models pre-trained
 
 ## What's New
 
+Aug 17, 2021
+ - Add EEEA-Net-C1 model
+
 Aug 3, 2021
  - Add EEEA-Net-C2 model
 
@@ -29,7 +32,7 @@ Oct 27, 2020
  - [dartsv2](https://github.com/quark0/darts)
  - [pdarts](https://github.com/chenxin061/pdarts)
  - [relative_nas](https://github.com/EMI-Group/RelativeNAS)
- - [eeea_c2](https://github.com/chakkritte/EEEA-Net)
+ - [eeea_c1, eeea_c2](https://github.com/chakkritte/EEEA-Net)
   
 ## Install
 
@@ -41,7 +44,7 @@ The library can be installed with pip:
 
     import darmo
     
-    # just change -> "dartsv2", "pdarts", "relative_nas", "nasnet", "eeea_c2"
+    # just change -> "dartsv2", "pdarts", "relative_nas", "nasnet", "eeea_c2", "eeea_c1"
     model = darmo.create_model("dartsv2", num_classes=1000, pretrained=True, auxiliary=True)
 
 ## Supported Transfer learning
@@ -62,8 +65,8 @@ The library can be installed with pip:
 |--|--|--|
 | dartsv2 | 73.59 | 91.40 |
 | pdarts | 75.94 | 92.74 |
-| relative_nas |  |  |
-| nasnet |  |  |
+| eeea_c1 | |  |
+| eeea_c2 | 76.17| 92.66 |
 
 ## Citations this source code
 
