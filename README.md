@@ -10,6 +10,9 @@ Darts family models pre-trained
 
 ## What's New
 
+Sep 5, 2021
+ - Add ResNet50 ImageNet-1k and ImageNet-21k, Thank from [21k-weight](https://github.com/Alibaba-MIIL/ImageNet21K)
+
 Aug 17, 2021
  - Add EEEA-Net-C1 model
 
@@ -33,6 +36,7 @@ Oct 27, 2020
  - [pdarts](https://github.com/chenxin061/pdarts)
  - [relative_nas](https://github.com/EMI-Group/RelativeNAS)
  - [eeea_c1, eeea_c2](https://github.com/chakkritte/EEEA-Net)
+ - [resnet50_1k, resnet50_21k](https://arxiv.org/abs/1512.03385)
   
 ## Install
 

@@ -14,6 +14,8 @@ import pkg_resources
 from .nasnet import NASNetAMobile
 from .nsga import NSGANetV2
 
+from .resnet import *
+
 Genotype = namedtuple('Genotype', 'normal normal_concat reduce reduce_concat')
 
 url_cfgs = {
