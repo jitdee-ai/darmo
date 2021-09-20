@@ -2,10 +2,10 @@ import torch
 import torch.nn as nn
 from torch.nn import Module as Module
 from collections import OrderedDict
-from .layers import AntiAliasDownsampleLayer
-from .layers import FastAvgPool2d
-from .layers import SEModule, SpaceToDepthModule
-from .layers import InplaceAbn
+from .anti_aliasing import AntiAliasDownsampleLayer
+from .avg_pool import FastAvgPool2d
+from .general_layers import SEModule, SpaceToDepthModule
+from .inplace_abn import InplaceAbn
 
 from .registry import register_model
 from .utils import _set_config, _load
