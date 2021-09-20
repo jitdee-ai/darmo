@@ -2,7 +2,7 @@ from .registry import is_model, is_model_in_modules, model_entrypoint
 
 def create_model(
         model_name,
-        pretrained=False,
+        pretrained=True,
         num_classes=1000,
         auxiliary=True,
         **kwargs):

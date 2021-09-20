@@ -1,13 +1,76 @@
 from timm.models.layers import drop_path
 from ofa.imagenet_codebase.modules.layers import *
-# from ofa.imagenet_codebase.networks import MobileNetV3
 from ofa.layers import set_layer_from_config, MBInvertedConvLayer, ConvLayer, IdentityLayer, LinearLayer
-# from ofa.imagenet_codebase.utils import MyNetwork, make_divisible
 from ofa.imagenet_codebase.networks.proxyless_nets import MobileInvertedResidualBlock
 import torch
-import json
 import torch.nn as nn
 import torch
+
+from .registry import register_model
+import json
+import pkg_resources
+from .utils import _set_config, _load
+
+url_cfgs = {
+    'eeea_c1' : 'https://github.com/jitdee-ai/darmo/releases/download/0.0.1/eeea_c1.pt',
+    'eeea_c2' : 'https://github.com/jitdee-ai/darmo/releases/download/0.0.1/eeea-c2.pt',
+    'ofa595_1k' : 'https://github.com/jitdee-ai/darmo/releases/download/0.0.1/ofa595_1k_b1a18d5.pt',
+    'ofa595_21k' : 'https://github.com/jitdee-ai/darmo/releases/download/0.0.1/ofa595_21k_ec9428e.pt',
+}
+
+def _create_network(config):
+    if config['name'].startswith("ofa595"):
+        config_file = pkg_resources.resource_filename(__name__, "config/ofa595.config")
+    else:
+        config_file = pkg_resources.resource_filename(__name__, "config/"+config['name']+".config")
+    config_subnet = json.load(open(config_file))
+
+    if config['name'] == "ofa595_21k":
+        config_subnet['classifier']['out_features'] = config['num_classes']
+
+    base_net = NSGANetV2.build_from_config(config_subnet, depth=None)
+
+    if config['name'] == "ofa595_21k":
+        base_net.classifier = None
+
+    _load(config, base_net, url_cfgs)
+
+    if config['name'] == "ofa595_21k":
+        NSGANetV2.reset_classifier(base_net, 1536, config['num_classes'], dropout_rate=0.0)
+    
+    return base_net
+
+@register_model
+def ofa595_1k(pretrained=True, num_classes=1000, auxiliary=True):
+
+    config = _set_config(_config={}, name= 'ofa595_1k', first_channels=None, layers=None, auxiliary=auxiliary, 
+                        genotype=None, last_bn=False, pretrained=pretrained, num_classes=num_classes)
+
+    return _create_network(config)
+
+@register_model
+def ofa595_21k(pretrained=True, num_classes=11221, auxiliary=True):
+
+    config = _set_config(_config={}, name= 'ofa595_21k', first_channels=None, layers=None, auxiliary=auxiliary, 
+                        genotype=None, last_bn=False, pretrained=pretrained, num_classes=11221)
+
+    return _create_network(config)
+
+@register_model
+def eeea_c1(pretrained=True, num_classes=1000, auxiliary=True):
+
+    config = _set_config(_config={}, name= 'eeea_c1', first_channels=46, layers=14, auxiliary=auxiliary, 
+                        genotype=None, last_bn=False, pretrained=pretrained, num_classes=num_classes)
+
+    return _create_network(config)
+
+@register_model
+def eeea_c2(pretrained=True, num_classes=1000, auxiliary=True):
+
+    config = _set_config(_config={}, name= 'eeea_c2', first_channels=46, layers=14, auxiliary=auxiliary, 
+                        genotype=None, last_bn=False, pretrained=pretrained, num_classes=num_classes)
+
+    return _create_network(config)
 
 class MobileInvertedResidualBlock(MyModule):
     """
@@ -157,52 +220,40 @@ class NSGANetV2(MobileNetV3):
                 if isinstance(m.mobile_inverted_conv, MBInvertedConvLayer) and isinstance(m.shortcut, IdentityLayer):
                     m.mobile_inverted_conv.point_linear.bn.weight.data.zero_()
 
-    @staticmethod
-    def build_net_via_cfg(cfg, input_channel, last_channel, n_classes, dropout_rate):
-        # first conv layer
-        first_conv = ConvLayer(
-            3, input_channel, kernel_size=3, stride=2, use_bn=True, act_func='h_swish', ops_order='weight_bn_act'
-        )
-        # build mobile blocks
-        feature_dim = input_channel
-        blocks = []
-        for stage_id, block_config_list in cfg.items():
-            for k, mid_channel, out_channel, use_se, act_func, stride, expand_ratio in block_config_list:
-                mb_conv = MBInvertedConvLayer(
-                    feature_dim, out_channel, k, stride, expand_ratio, mid_channel, act_func, use_se
-                )
-                if stride == 1 and out_channel == feature_dim:
-                    shortcut = IdentityLayer(out_channel, out_channel)
-                else:
-                    shortcut = None
-                blocks.append(MobileInvertedResidualBlock(mb_conv, shortcut))
-                feature_dim = out_channel
-        # final expand layer
-        final_expand_layer = ConvLayer(
-            feature_dim, feature_dim * 6, kernel_size=1, use_bn=True, act_func='h_swish', ops_order='weight_bn_act',
-        )
-        feature_dim = feature_dim * 6
-        # feature mix layer
-        feature_mix_layer = ConvLayer(
-            feature_dim, last_channel, kernel_size=1, bias=False, use_bn=False, act_func='h_swish',
-        )
-        # classifier
-        classifier = LinearLayer(last_channel, n_classes, dropout_rate=dropout_rate)
+    # @staticmethod
+    # def build_net_via_cfg(cfg, input_channel, last_channel, n_classes, dropout_rate):
+    #     # first conv layer
+    #     first_conv = ConvLayer(
+    #         3, input_channel, kernel_size=3, stride=2, use_bn=True, act_func='h_swish', ops_order='weight_bn_act'
+    #     )
+    #     # build mobile blocks
+    #     feature_dim = input_channel
+    #     blocks = []
+    #     for stage_id, block_config_list in cfg.items():
+    #         for k, mid_channel, out_channel, use_se, act_func, stride, expand_ratio in block_config_list:
+    #             mb_conv = MBInvertedConvLayer(
+    #                 feature_dim, out_channel, k, stride, expand_ratio, mid_channel, act_func, use_se
+    #             )
+    #             if stride == 1 and out_channel == feature_dim:
+    #                 shortcut = IdentityLayer(out_channel, out_channel)
+    #             else:
+    #                 shortcut = None
+    #             blocks.append(MobileInvertedResidualBlock(mb_conv, shortcut))
+    #             feature_dim = out_channel
+    #     # final expand layer
+    #     final_expand_layer = ConvLayer(
+    #         feature_dim, feature_dim * 6, kernel_size=1, use_bn=True, act_func='h_swish', ops_order='weight_bn_act',
+    #     )
+    #     feature_dim = feature_dim * 6
+    #     # feature mix layer
+    #     feature_mix_layer = ConvLayer(
+    #         feature_dim, last_channel, kernel_size=1, bias=False, use_bn=False, act_func='h_swish',
+    #     )
+    #     # classifier
+    #     classifier = LinearLayer(last_channel, n_classes, dropout_rate=dropout_rate)
 
-        return first_conv, blocks, final_expand_layer, feature_mix_layer, classifier
+    #     return first_conv, blocks, final_expand_layer, feature_mix_layer, classifier
 
     @staticmethod
     def reset_classifier(model, last_channel, n_classes, dropout_rate=0.0):
         model.classifier = LinearLayer(last_channel, n_classes, dropout_rate=dropout_rate)
-
-# def eeeanet(weight_path=None):
-#     config = json.load(open(weight_path+'/net.config'))
-#     subnet = json.load(open(weight_path+'/net.subnet'))
-#     model = NSGANetV2.build_from_config(config, depth=subnet['d'])
-#     if weight_path is not None:
-#         init = torch.load(weight_path+'/net.inherited', map_location='cpu')
-#         model.load_state_dict(init, True)
-#     torch.save(model.state_dict(), "eeea-c2.pt")
-#     return model
-
-# eeeanet("net-flops@217")

@@ -7,6 +7,14 @@ url_cfgs = {
     'resnet50_21k' : 'https://miil-public-eu.oss-eu-central-1.aliyuncs.com/model-zoo/ImageNet_21K_P/models/resnet50_miil_21k.pth',
 }
 
+@register_model
+def resnet50_1k(pretrained=True, num_classes=1000, auxiliary=False):
+    return ResNet(pretrained=pretrained, num_classes=num_classes, name="resnet50_1k")
+
+@register_model
+def resnet50_21k(pretrained=True, num_classes=11221, auxiliary=False):
+    return ResNet(pretrained=pretrained, num_classes=num_classes, name="resnet50_21k")
+
 class ResNet(nn.Module):
     def __init__(self, pretrained=False, num_classes=1000, name="resnet50_21k"):
         super(ResNet, self).__init__()
@@ -37,11 +45,3 @@ class ResNet(nn.Module):
             self.resnet.fc = nn.Linear(self.num_features, self.num_classes)
         else:
             self.resnet.fc = None
-
-@register_model
-def resnet50_1k(pretrained=True, num_classes=1000, auxiliary=False):
-    return ResNet(pretrained=pretrained, num_classes=num_classes, name="resnet50_1k")
-
-@register_model
-def resnet50_21k(pretrained=True, num_classes=1000, auxiliary=False):
-    return ResNet(pretrained=pretrained, num_classes=num_classes, name="resnet50_21k")

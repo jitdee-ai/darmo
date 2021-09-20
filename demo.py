@@ -1,9 +1,9 @@
 import darmo
 
-model = darmo.create_model("resnet50_1k", num_classes=1000, pretrained=True)
+model = darmo.create_model("eeea_c2", pretrained=True)
 #model.reset_classifier(num_classes=100, dropout=0.2)
-#print(model)
 
+model.eval()
 
 from torch.autograd import Variable
 import torch
