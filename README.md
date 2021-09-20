@@ -12,7 +12,7 @@ Darts family models pre-trained
 
 Sep 20, 2021
  - Add OFA-595 ImageNet-1k and ImageNet-21k, Thank from [21k-weight](https://github.com/Alibaba-MIIL/ImageNet21K) 
- - Add TResNet-M and TResNetV2-L ImageNet-21k, Thank from [21k-weight](https://github.com/Alibaba-MIIL/ImageNet21K)
+ - Add TResNet-M ImageNet-21k, Thank from [21k-weight](https://github.com/Alibaba-MIIL/ImageNet21K)
 
 Sep 5, 2021
  - Add ResNet50 ImageNet-1k and ImageNet-21k, Thank from [21k-weight](https://github.com/Alibaba-MIIL/ImageNet21K)
@@ -42,7 +42,7 @@ Oct 27, 2020
  - [eeea_c1, eeea_c2](https://github.com/chakkritte/EEEA-Net)
  - [resnet50_1k, resnet50_21k](https://arxiv.org/abs/1512.03385)
  - [ofa595_1k, ofa595_21k](https://github.com/mit-han-lab/once-for-all)
- - [tresnet_m_21k, tresnetv2_l_21k](https://github.com/Alibaba-MIIL/TResNet)
+ - [tresnet_m_21k](https://github.com/Alibaba-MIIL/TResNet)
   
 ## Install
 

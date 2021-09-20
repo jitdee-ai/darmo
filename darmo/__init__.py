@@ -12,7 +12,6 @@ import pkg_resources
 
 from .resnet import *
 from .tresnet import *
-from .tresnetv2 import *
 from .nasnet import NASNetAMobile
 from .nsga import *
 

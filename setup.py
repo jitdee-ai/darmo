@@ -9,7 +9,6 @@ setup(
     author_email='chakkritt60@nu.ac.th',
     packages=[  'darmo', 
                 'darmo.layers.tresnetv1',
-                'darmo.layers.tresnetv2',
             ],
     url='https://github.com/jitdee-ai/darmo',
     description='darts model pre-trained',
