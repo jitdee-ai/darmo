@@ -17,7 +17,7 @@ url_cfgs = {
 
 @register_model
 def tresnet_m_21k(pretrained=True, num_classes=11221, auxiliary=False):
-    model_params = {'num_classes': num_classes}
+    model_params = {'num_classes': 11221}
 
     config = _set_config(_config={}, name= 'tresnet_m_21k', first_channels=46, layers=14, auxiliary=auxiliary, 
                         genotype=None, last_bn=False, pretrained=pretrained, num_classes=11221)
@@ -28,7 +28,7 @@ def tresnet_m_21k(pretrained=True, num_classes=11221, auxiliary=False):
 
 @register_model
 def tresnet_l_21k(pretrained=True, num_classes=11221, auxiliary=False):
-    model_params = {'num_classes': num_classes}
+    model_params = {'num_classes': 11221}
 
     config = _set_config(_config={}, name= 'tresnet_l_21k', first_channels=46, layers=14, auxiliary=auxiliary, 
                         genotype=None, last_bn=False, pretrained=pretrained, num_classes=11221)
