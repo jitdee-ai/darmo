@@ -11,8 +11,8 @@ from .registry import register_model
 from .utils import _set_config, _load
 
 url_cfgs = {
-    'tresnet_m_21k' : 'https://miil-public-eu.oss-eu-central-1.aliyuncs.com/model-zoo/ImageNet_21K_P/models/tresnet_m_miil_21k.pth',
-    'tresnet_l_21k' : 'https://miil-public-eu.oss-eu-central-1.aliyuncs.com/model-zoo/ImageNet_21K_P/models/tresnet_l_v2_miil_21k.pth',
+    'tresnet_m_21k' : 'https://github.com/jitdee-ai/darmo/releases/download/0.0.1/tresnet_m_miil_21k.pth',
+    'tresnet_l_21k' : 'https://github.com/jitdee-ai/darmo/releases/download/0.0.1/tresnet_l_v2_miil_21k.pth',
 }
 
 @register_model
@@ -20,7 +20,7 @@ def tresnet_m_21k(pretrained=True, num_classes=11221, auxiliary=False):
     model_params = {'num_classes': num_classes}
 
     config = _set_config(_config={}, name= 'tresnet_m_21k', first_channels=46, layers=14, auxiliary=auxiliary, 
-                        genotype=None, last_bn=False, pretrained=pretrained, num_classes=num_classes)
+                        genotype=None, last_bn=False, pretrained=pretrained, num_classes=11221)
 
     base_net = TResnetM(model_params)
     _load(config, base_net, url_cfgs, True)
@@ -31,7 +31,7 @@ def tresnet_l_21k(pretrained=True, num_classes=11221, auxiliary=False):
     model_params = {'num_classes': num_classes}
 
     config = _set_config(_config={}, name= 'tresnet_l_21k', first_channels=46, layers=14, auxiliary=auxiliary, 
-                        genotype=None, last_bn=False, pretrained=pretrained, num_classes=num_classes)
+                        genotype=None, last_bn=False, pretrained=pretrained, num_classes=11221)
 
     base_net = TResnetM(model_params)
     _load(config, base_net, url_cfgs, True)
