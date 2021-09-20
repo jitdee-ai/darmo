@@ -1,42 +1,61 @@
-import torch
-import torch.nn as nn
-from torch.nn import Module as Module
 from collections import OrderedDict
-from .layers.tresnetv1.anti_aliasing import AntiAliasDownsampleLayer
-from .layers.tresnetv1.avg_pool import FastAvgPool2d
-from .layers.tresnetv1.general_layers import SEModule, SpaceToDepthModule
-from .layers.tresnetv1.inplace_abn import InplaceAbn
+from functools import partial
+import torch.nn as nn
+import torch
+from torch.nn import Module as Module
+from .layers.tresnetv2.anti_aliasing import AntiAliasDownsampleLayer
+from .layers.tresnetv2.avg_pool import FastGlobalAvgPool2d
+from .layers.tresnetv2.space_to_depth import SpaceToDepthModule
+from .layers.tresnetv2.squeeze_and_excite import SEModule
+
+try:
+    from inplace_abn import InPlaceABN
+    from inplace_abn import ABN
+except ImportError:
+    raise ImportError(
+            "We supported only Linux system, Please install InplaceABN:'pip install inplace-abn'")
 
 from .registry import register_model
 from .utils import _set_config, _load
 
 url_cfgs = {
-    'tresnet_m_21k' : 'https://github.com/jitdee-ai/darmo/releases/download/0.0.1/tresnet_m_miil_21k.pth',
+    'tresnetv2_l_21k' : 'https://github.com/jitdee-ai/darmo/releases/download/0.0.1/tresnet_l_v2_miil_21k.pth',
 }
 
 @register_model
-def tresnet_m_21k(pretrained=True, num_classes=11221, auxiliary=False):
+def tresnetv2_l_21k(pretrained=True, num_classes=11221, auxiliary=False):
     model_params = {'num_classes': 11221}
 
-    config = _set_config(_config={}, name= 'tresnet_m_21k', first_channels=46, layers=14, auxiliary=auxiliary, 
+    config = _set_config(_config={}, name= 'tresnetv2_l_21k', first_channels=46, layers=14, auxiliary=auxiliary, 
                         genotype=None, last_bn=False, pretrained=pretrained, num_classes=11221)
 
-    base_net = TResnetM(model_params)
+    base_net = TResnetL_V2(model_params)
     _load(config, base_net, url_cfgs, True)
     return base_net
 
-class bottleneck_head(nn.Module):
-    def __init__(self, num_features, num_classes, bottleneck_features=200):
-        super(bottleneck_head, self).__init__()
-        self.embedding_generator = nn.ModuleList()
-        self.embedding_generator.append(nn.Linear(num_features, bottleneck_features))
-        self.embedding_generator = nn.Sequential(*self.embedding_generator)
-        self.FC = nn.Linear(bottleneck_features, num_classes)
+def InplacABN_to_ABN(module: nn.Module) -> nn.Module:
+    # convert all InplaceABN layer to bit-accurate ABN layers.
+    if isinstance(module, InPlaceABN):
+        module_new = ABN(module.num_features, activation=module.activation,
+                         activation_param=module.activation_param)
+        for key in module.state_dict():
+            module_new.state_dict()[key].copy_(module.state_dict()[key])
+        module_new.training = module.training
+        module_new.weight.data = module_new.weight.abs() + module_new.eps
+        return module_new
+    for name, child in reversed(module._modules.items()):
+        new_child = InplacABN_to_ABN(child)
+        if new_child != child:
+            module._modules[name] = new_child
+    return module
 
-    def forward(self, x):
-        self.embedding = self.embedding_generator(x)
-        logits = self.FC(self.embedding)
-        return logits
+
+def conv3x3(in_planes, out_planes, stride=1):
+    return nn.Conv2d(in_planes, out_planes, kernel_size=3, stride=stride, padding=1, bias=False)
+
+
+def conv3x3_depth(planes, stride=1):
+    return nn.Conv2d(planes, planes, groups=planes, kernel_size=3, stride=stride, padding=1, bias=False)
 
 
 def conv2d(ni, nf, stride):
@@ -48,9 +67,11 @@ def conv2d(ni, nf, stride):
 
 
 def conv2d_ABN(ni, nf, stride, activation="leaky_relu", kernel_size=3, activation_param=1e-2, groups=1):
+    activation_param = 1e-6
     return nn.Sequential(
-        nn.Conv2d(ni, nf, kernel_size=kernel_size, stride=stride, padding=kernel_size // 2, groups=groups, bias=False), 
-        InplaceAbn(num_features=nf, act_layer=activation, act_param=activation_param)
+        nn.Conv2d(ni, nf, kernel_size=kernel_size, stride=stride, padding=kernel_size // 2, groups=groups,
+                  bias=False),
+        InPlaceABN(num_features=nf, activation=activation, activation_param=activation_param)
     )
 
 
@@ -73,7 +94,8 @@ class BasicBlock(Module):
         self.downsample = downsample
         self.stride = stride
         reduce_layer_planes = max(planes * self.expansion // 4, 64)
-        self.se = SEModule(planes * self.expansion, reduce_layer_planes) if use_se else None
+        self.se = SEModule(channels=planes * self.expansion, reduction_channels=reduce_layer_planes) if \
+            use_se else None
 
     def forward(self, x):
         if self.downsample is not None:
@@ -139,60 +161,54 @@ class Bottleneck(Module):
         return out
 
 
-class TResNet(Module):
+class TResNetV2(Module):
 
-    def __init__(self, layers, in_chans=3, num_classes=1000, width_factor=1.0,
-                 do_bottleneck_head=False, bottleneck_features=512, first_two_layers=BasicBlock):
-        super(TResNet, self).__init__()
-
-        # JIT layers
-        space_to_depth = SpaceToDepthModule()
-        anti_alias_layer = AntiAliasDownsampleLayer
-        global_pool_layer = FastAvgPool2d(flatten=True)
-
-        # TResnet stages
-        self.inplanes = int(64 * width_factor)
-        self.planes = int(64 * width_factor)
+    def __init__(self, layers, in_chans=3, num_classes=1000, width_factor=1.0, remove_model_jit=False):
+        super(TResNetV2, self).__init__()
+        ## body
+        self.inplanes = int(int(64 * width_factor + 4) / 8) * 8
+        self.planes = int(int(64 * width_factor + 4) / 8) * 8
+        SpaceToDepth = SpaceToDepthModule(remove_model_jit=remove_model_jit)
         conv1 = conv2d_ABN(in_chans * 16, self.planes, stride=1, kernel_size=3)
-        layer1 = self._make_layer(first_two_layers, self.planes, layers[0], stride=1, use_se=True,
+
+        anti_alias_layer = partial(AntiAliasDownsampleLayer, remove_aa_jit=remove_model_jit)
+        global_pool_layer = FastGlobalAvgPool2d(flatten=True)
+        layer1 = self._make_layer(Bottleneck, self.planes, layers[0], stride=1, use_se=True,
                                   anti_alias_layer=anti_alias_layer)  # 56x56
-        layer2 = self._make_layer(first_two_layers, self.planes * 2, layers[1], stride=2, use_se=True,
+        layer2 = self._make_layer(Bottleneck, self.planes * 2, layers[1], stride=2, use_se=True,
                                   anti_alias_layer=anti_alias_layer)  # 28x28
         layer3 = self._make_layer(Bottleneck, self.planes * 4, layers[2], stride=2, use_se=True,
                                   anti_alias_layer=anti_alias_layer)  # 14x14
         layer4 = self._make_layer(Bottleneck, self.planes * 8, layers[3], stride=2, use_se=False,
                                   anti_alias_layer=anti_alias_layer)  # 7x7
 
-        # body
         self.body = nn.Sequential(OrderedDict([
-            ('SpaceToDepth', space_to_depth),
+            ('SpaceToDepth', SpaceToDepth),
             ('conv1', conv1),
             ('layer1', layer1),
             ('layer2', layer2),
             ('layer3', layer3),
             ('layer4', layer4)]))
 
-        # head
-        self.embeddings = []
-        self.global_pool = nn.Sequential(OrderedDict([('global_pool_layer', global_pool_layer)]))
+        # default head
         self.num_features = (self.planes * 8) * Bottleneck.expansion
-        if do_bottleneck_head:
-            fc = bottleneck_head(self.num_features, num_classes,
-                                 bottleneck_features=bottleneck_features)
-        else:
-            fc = nn.Linear(self.num_features, num_classes)
+
+        fc = nn.Linear(self.num_features , num_classes)
+
+        self.global_pool = nn.Sequential(OrderedDict([('global_pool_layer', global_pool_layer)]))
 
         self.head = nn.Sequential(OrderedDict([('fc', fc)]))
 
-        # model initilization
+        self.embeddings = []
+
         for m in self.modules():
             if isinstance(m, nn.Conv2d):
                 nn.init.kaiming_normal_(m.weight, mode='fan_out', nonlinearity='leaky_relu')
-            elif isinstance(m, nn.BatchNorm2d) or isinstance(m, InplaceAbn):
+            elif isinstance(m, nn.BatchNorm2d) or isinstance(m, InPlaceABN):
                 nn.init.constant_(m.weight, 1)
                 nn.init.constant_(m.bias, 0)
 
-        # residual connections special initialization
+        # initilize resnet in a magic way
         for m in self.modules():
             if isinstance(m, BasicBlock):
                 m.conv2[1].weight = nn.Parameter(torch.zeros_like(m.conv2[1].weight))  # BN to zero
@@ -206,9 +222,11 @@ class TResNet(Module):
             layers = []
             if stride == 2:
                 # avg pooling before 1x1 conv
-                layers.append(nn.AvgPool2d(kernel_size=2, stride=2, ceil_mode=True, count_include_pad=False))
-            layers += [conv2d_ABN(self.inplanes, planes * block.expansion, kernel_size=1, stride=1,
-                                  activation="identity")]
+                layers.append(
+                    nn.AvgPool2d(kernel_size=2, stride=2, ceil_mode=True, count_include_pad=False))
+            layers += [
+                conv2d_ABN(self.inplanes, planes * block.expansion, kernel_size=1, stride=1,
+                           activation="identity")]
             downsample = nn.Sequential(*layers)
 
         layers = []
@@ -221,15 +239,19 @@ class TResNet(Module):
 
     def forward(self, x):
         x = self.body(x)
-        self.embeddings = self.global_pool(x)
-        logits = self.head(self.embeddings)
+        # self.embeddings = self.global_pool(x)
+        logits = self.head(self.global_pool(x))
         return logits
 
 
-def TResnetM(model_params):
-    """Constructs a medium TResnet model.
+def TResnetL_V2(model_params):
+    """Constructs a large TResnet model.
     """
     in_chans = 3
     num_classes = model_params['num_classes']
-    model = TResNet(layers=[3, 4, 11, 3], num_classes=num_classes, in_chans=in_chans)
+    remove_model_jit = False
+    layers_list = [3, 4, 23, 3]
+    width_factor = 1.0
+    model = TResNetV2(layers=layers_list, num_classes=num_classes, in_chans=in_chans,
+                      width_factor=width_factor, remove_model_jit=remove_model_jit)
     return model
