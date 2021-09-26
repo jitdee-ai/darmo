@@ -10,6 +10,9 @@ Darts family models pre-trained
 
 ## What's New
 
+Sep 26, 2021
+ - Add ResT ImageNet-1k models, Thank from [ResT](https://github.com/wofmanaf/ResT)
+
 Sep 20, 2021
  - Add OFA-595 ImageNet-1k and ImageNet-21k, Thank from [21k-weight](https://github.com/Alibaba-MIIL/ImageNet21K) 
  - Add TResNet-M ImageNet-21k, Thank from [21k-weight](https://github.com/Alibaba-MIIL/ImageNet21K)
@@ -43,7 +46,8 @@ Oct 27, 2020
  - [resnet50_1k, resnet50_21k](https://arxiv.org/abs/1512.03385)
  - [ofa595_1k, ofa595_21k](https://github.com/mit-han-lab/once-for-all)
  - [tresnet_m_21k](https://github.com/Alibaba-MIIL/TResNet)
-  
+ - [rest_lite, rest_small, rest_base, rest_large](https://github.com/Alibaba-MIIL/TResNet)
+
 ## Install
 
 The library can be installed with pip:
