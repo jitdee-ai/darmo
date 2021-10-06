@@ -16,6 +16,7 @@ from .nasnet import NASNetAMobile
 from .nsga import *
 
 from .models.rest import *
+from .models.pnasnet5 import PNASNetwork
 
 Genotype = namedtuple('Genotype', 'normal normal_concat reduce reduce_concat')
 
@@ -26,6 +27,7 @@ url_cfgs = {
     'nasnet' : 'https://github.com/jitdee-ai/darmo/releases/download/0.0.1/nasnetamobile-7e03cead.pth',
     'eeea_c1' : 'https://github.com/jitdee-ai/darmo/releases/download/0.0.1/eeea_c1.pt',
     'eeea_c2' : 'https://github.com/jitdee-ai/darmo/releases/download/0.0.1/eeea-c2.pt',
+    'pnas5' : 'https://github.com/jitdee-ai/darmo/releases/download/0.0.1/PNASNet-5_Large.pth',
 }
 
 def _load_pre_trained(config):
@@ -38,14 +40,21 @@ def _load_pre_trained(config):
         subnet = json.load(open(subnet_file))
         base_net = NSGANetV2.build_from_config(config_subnet, depth=subnet['d'])
     else:
-        base_net = NetworkImageNet(
-            config['first_channels'], 
-            config['num_classes'], 
-            config['layers'], 
-            config['auxiliary'], 
-            config['genotype'],
-            config['last_bn'])
-
+        if config['name'].startswith("pnas5"):
+            base_net = PNASNetwork(
+                config['first_channels'], 
+                config['num_classes'], 
+                config['layers'], 
+                config['auxiliary'], 
+                config['genotype'])
+        else: 
+            base_net = NetworkImageNet(
+                config['first_channels'], 
+                config['num_classes'], 
+                config['layers'], 
+                config['auxiliary'], 
+                config['genotype'],
+                config['last_bn'])
     if config['pretrained']:
         state_dict = model_zoo.load_url(url_cfgs[config['name']], progress=True, map_location='cpu')
         try:
@@ -92,3 +101,11 @@ def nasnet(pretrained=True, num_classes=1000, auxiliary=True):
 
     return _load_pre_trained(config)
 
+
+@register_model
+def pnas5(pretrained=True, num_classes=1000, auxiliary=False):
+
+    pnas5 = Genotype( normal = [ ('sep_conv_5x5', 0), ('max_pool_3x3', 0), ('sep_conv_7x7', 1), ('max_pool_3x3', 1), ('sep_conv_5x5', 1), ('sep_conv_3x3', 1), ('sep_conv_3x3', 4), ('max_pool_3x3', 1), ('sep_conv_3x3', 0), ('skip_connect', 1), ], normal_concat = [2, 3, 4, 5, 6], reduce = [ ('sep_conv_5x5', 0), ('max_pool_3x3', 0), ('sep_conv_7x7', 1), ('max_pool_3x3', 1), ('sep_conv_5x5', 1), ('sep_conv_3x3', 1), ('sep_conv_3x3', 4), ('max_pool_3x3', 1), ('sep_conv_3x3', 0), ('skip_connect', 1), ], reduce_concat = [2, 3, 4, 5, 6], )
+    config = _set_config(_config={}, name= 'pnas5', first_channels=216, layers=12, auxiliary=False, 
+                        genotype=pnas5, last_bn=False, pretrained=pretrained, num_classes=1001)
+    return _load_pre_trained(config)

@@ -35,9 +35,10 @@ def _create_network(config):
 
     _load(config, base_net, url_cfgs)
 
-    if config['name'] == "ofa595_21k":
+    #if config['name'] == "ofa595_21k":
+    if config['name'].startswith("ofa595_"):
         NSGANetV2.reset_classifier(base_net, 1536, config['num_classes'], dropout_rate=0.0)
-    
+        base_net.num_features = 1536
     return base_net
 
 @register_model

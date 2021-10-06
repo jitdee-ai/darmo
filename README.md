@@ -10,6 +10,9 @@ Darts family models pre-trained
 
 ## What's New
 
+Oct 6, 2021
+ - Add PNASNet5 ImageNet-1k models, Thank from [PNASNet5](https://github.com/samyak0210/saliency/)
+
 Sep 26, 2021
  - Add ResT ImageNet-1k models, Thank from [ResT](https://github.com/wofmanaf/ResT)
 
@@ -47,6 +50,7 @@ Oct 27, 2020
  - [ofa595_1k, ofa595_21k](https://github.com/mit-han-lab/once-for-all)
  - [tresnet_m_21k](https://github.com/Alibaba-MIIL/TResNet)
  - [rest_lite, rest_small, rest_base, rest_large](https://github.com/Alibaba-MIIL/TResNet)
+ - [pnas5](https://github.com/samyak0210/saliency/)
 
 ## Install
 

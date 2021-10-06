@@ -1,7 +1,7 @@
 import darmo
 
-model = darmo.create_model("eeea_c2", pretrained=True)
-#model.reset_classifier(num_classes=100, dropout=0.2)
+model = darmo.create_model("pnas5", pretrained=True, auxiliary=False)
+model.reset_classifier(num_classes=100, dropout=0.2)
 
 model.eval()
 
