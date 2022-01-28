@@ -21,7 +21,7 @@ setup(
             ],
     url='https://github.com/jitdee-ai/darmo',
     description='darts model pre-trained',
-    install_requires=['torch >= 1.0', 'torchvision', 'ofa==0.0.4.post2007200808', 'timm==0.4.12'],
+    install_requires=['torch >= 1.0', 'torchvision', 'ofa==0.0.4.post2007200808', 'timm==0.4.12', 'filelock'],
     include_package_data=True,
     python_requires='>=3.6',
     package_data={
