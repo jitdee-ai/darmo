@@ -10,6 +10,9 @@ Darts family models pre-trained
 
 ## What's New
 
+Feb 2, 2022
+ - Add AutoFormerV2 ImageNet-1k models, Thank from [AutoFormerV2](https://github.com/silent-chen/AutoFormerV2-model-zoo)
+
 Oct 6, 2021
  - Add PNASNet5 ImageNet-1k models, Thank from [PNASNet5](https://github.com/samyak0210/saliency/)
 
@@ -51,6 +54,7 @@ Oct 27, 2020
  - [tresnet_m_21k](https://github.com/Alibaba-MIIL/TResNet)
  - [rest_lite, rest_small, rest_base, rest_large](https://github.com/Alibaba-MIIL/TResNet)
  - [pnas5](https://github.com/samyak0210/saliency/)
+ - [autoformerv2_tiny, autoformerv2_small, autoformerv2_base](https://github.com/silent-chen/AutoFormerV2-model-zoo)
 
 ## Install
 
