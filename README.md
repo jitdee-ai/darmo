@@ -10,6 +10,9 @@ Darts family models pre-trained
 
 ## What's New
 
+May 17, 2023
+ - Add Vision GNN ImageNet-1k models, Thank from [Vision GNN](https://github.com/huawei-noah/Efficient-AI-Backbones/tree/master/vig_pytorch)
+
 Feb 2, 2022
  - Add AutoFormerV2 ImageNet-1k models, Thank from [AutoFormerV2](https://github.com/silent-chen/AutoFormerV2-model-zoo)
 
@@ -55,6 +58,7 @@ Oct 27, 2020
  - [rest_lite, rest_small, rest_base, rest_large](https://github.com/Alibaba-MIIL/TResNet)
  - [pnas5](https://github.com/samyak0210/saliency/)
  - [autoformerv2_tiny, autoformerv2_small, autoformerv2_base](https://github.com/silent-chen/AutoFormerV2-model-zoo)
+ - [pvig_ti_224_gelu, pvig_s_224_gelu, pvig_m_224_gelu, pvig_b_224_gelu](https://arxiv.org/abs/2206.00272)
 
 ## Install
 
